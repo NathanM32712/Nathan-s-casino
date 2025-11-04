@@ -60,7 +60,6 @@
     <input id="user" placeholder="Username" />
     <input id="pass" placeholder="Password" type="password" />
     <input id="name" placeholder="Display Name" />
-    <input id="bal" placeholder="Starting Balance" type="number" value="1000" />
     <button id="go">Login</button>
     <div class="msg" id="msg"></div>
   </div>
@@ -94,12 +93,11 @@
       const user = document.getElementById('user').value.trim();
       const pass = document.getElementById('pass').value.trim();
       const name = document.getElementById('name').value.trim();
-      const bal = Math.max(0, Number(document.getElementById('bal').value.trim()) || 0);
       if (!user || !pass || !name) {
         msg.textContent = 'Please fill all fields.';
         return;
       }
-      const obj = { username: user, pass, displayname: name, balance: bal };
+      const obj = { username: user, pass, displayname: name };
       setCookie('localaccount', JSON.stringify(obj));
       msg.textContent = 'Welcome ' + name + '! Redirecting...';
       setTimeout(() => location.href = 'home.html', 1200);

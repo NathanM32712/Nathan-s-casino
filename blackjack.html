@@ -5,10 +5,17 @@
   <title>Blackjack</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
+    :root {
+      --bg: #031026;
+      --fg: #cfefff;
+      --accent: #48b0ff;
+      --muted: #9bd6ff;
+      --danger: #ff6b6b;
+    }
     body {
       margin: 0;
-      background: #031026;
-      color: #cfefff;
+      background: var(--bg);
+      color: var(--fg);
       font-family: Segoe UI, Roboto, system-ui, sans-serif;
     }
     .wrap {
@@ -16,10 +23,25 @@
       margin: 40px auto;
       padding: 20px;
     }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
     h1 {
       font-size: 24px;
-      color: #48b0ff;
-      margin-bottom: 12px;
+      color: var(--accent);
+      margin: 0;
+    }
+    .home-btn {
+      background: var(--accent);
+      color: #001;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
     }
     .table {
       background: #06273f;
@@ -39,7 +61,7 @@
     }
     .hand-title {
       font-size: 13px;
-      color: #9bd6ff;
+      color: var(--muted);
       margin-bottom: 8px;
     }
     .hand {
@@ -67,9 +89,10 @@
       display: flex;
       gap: 8px;
       margin-bottom: 12px;
+      align-items: center;
     }
     button {
-      background: linear-gradient(180deg,#48b0ff,#1e90ff);
+      background: linear-gradient(180deg,var(--accent),#1e90ff);
       border: none;
       color: #001;
       padding: 10px 14px;
@@ -80,24 +103,36 @@
     .btn-ghost {
       background: transparent;
       border: 1px solid rgba(255,255,255,0.06);
-      color: #9bd6ff;
+      color: var(--muted);
     }
     .status {
       margin-top: 12px;
       font-size: 14px;
-      color: #9bd6ff;
+      color: var(--muted);
     }
     .small {
       font-size: 13px;
-      color: #9bd6ff;
+      color: var(--muted);
     }
     .win { color: #7fff7f; font-weight: bold; }
-    .lose { color: #ff6b6b; font-weight: bold; }
+    .lose { color: var(--danger); font-weight: bold; }
+    input[type="number"] {
+      width: 80px;
+      padding: 6px;
+      border-radius: 6px;
+      border: none;
+      background: #072a3f;
+      color: var(--fg);
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Blackjack</h1>
+    <header>
+      <h1>Blackjack</h1>
+      <button class="home-btn" onclick="location.href='home.html'">🏠 Home</button>
+    </header>
+
     <div class="table">
       <div class="row">
         <div class="area">
@@ -117,8 +152,8 @@
         <button id="hitBtn" class="btn-ghost" disabled>Hit</button>
         <button id="standBtn" class="btn-ghost" disabled>Stand</button>
         <button id="doubleBtn" class="btn-ghost" disabled>Double</button>
-        <div style="margin-left:auto" class="small">Bank: <span id="bankDisplay">$0</span></div>
-        <input id="betInput" type="number" min="1" value="25" style="width:80px;padding:6px;border-radius:6px;border:none;background:#072a3f;color:#cfefff" />
+        <div class="small">Bank: <span id="bankDisplay">$0</span></div>
+        <input id="betInput" type="number" min="1" value="25" />
       </div>
 
       <div id="status" class="status">Click Deal to start.</div>
@@ -200,23 +235,4 @@
     function updateUI(showDealer = false) {
       dealerHandEl.innerHTML = '';
       playerHandEl.innerHTML = '';
-      dealer.forEach((c, i) => dealerHandEl.appendChild(renderCard(c, i === 1 && !showDealer && inRound)));
-      player.forEach(c => playerHandEl.appendChild(renderCard(c)));
-      dealerValueEl.textContent = showDealer ? 'Value: ' + handValue(dealer) : 'Value: ?';
-      playerValueEl.textContent = 'Value: ' + handValue(player);
-      bankDisplay.textContent = '$' + bank;
-    }
-
-    function setStatus(msg, cls = '') {
-      statusEl.textContent = msg;
-      statusEl.className = 'status ' + cls;
-    }
-
-    function enableActions(on) {
-      hitBtn.disabled = !on;
-      standBtn.disabled = !on;
-      doubleBtn.disabled = !on;
-    }
-
-    function startRound() {
-      if (in
+      dealer.forEach((c, i) => dealer

@@ -2,322 +2,221 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Blackjack (Blue Theme) — Persistent Balance</title>
+  <title>Blackjack</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    :root{
-      --bg-0:#031026; --bg-1:#04223b; --panel:#06273f; --card:#08314a;
-      --accent:#48b0ff; --accent-2:#1e90ff; --muted:#9bd6ff; --text:#e6f7ff;
-      --danger:#ff6b6b; --glass: rgba(255,255,255,0.03);
+    body {
+      margin: 0;
+      background: #031026;
+      color: #cfefff;
+      font-family: Segoe UI, Roboto, system-ui, sans-serif;
     }
-    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg-0),var(--bg-1));color:var(--text);font-family:Inter,Segoe UI,Roboto,system-ui,-apple-system,"Helvetica Neue",Arial}
-    .wrap{max-width:980px;margin:28px auto;padding:18px}
-    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
-    h1{margin:0;font-size:20px;color:var(--accent)}
-    .table{background:linear-gradient(180deg,var(--panel),#022036);border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.04)}
-    .row{display:flex;gap:12px;align-items:center}
-    .area{flex:1;min-height:160px;padding:12px;border-radius:10px;background:linear-gradient(180deg,var(--card),#042b41);border:1px solid var(--glass)}
-    .hand-title{font-size:13px;color:var(--muted);margin-bottom:8px}
-    .hand{display:flex;gap:8px;flex-wrap:wrap}
-    .card{width:86px;height:120px;border-radius:8px;background:linear-gradient(180deg,#ffffff,#f0f8ff);color:#022;display:flex;flex-direction:column;justify-content:space-between;padding:8px;font-weight:800;box-shadow:0 6px 18px rgba(1,10,30,0.6);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;border:2px solid rgba(30,144,255,0.12)}
-    .card.blue{color:var(--accent-2)}
-    .card.red{color:#c62828}
-    .card .top,.card .bot{font-size:14px}
-    .card .center{font-size:30px;text-align:center;line-height:1}
-    .controls{display:flex;gap:8px;margin-top:12px}
-    button{background:linear-gradient(180deg,var(--accent),var(--accent-2));border:none;color:#001;padding:10px 12px;border-radius:8px;font-weight:800;cursor:pointer}
-    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
-    .status{margin-top:12px;color:var(--muted)}
-    .bottom-row{display:flex;align-items:center;gap:12px;margin-top:14px;justify-content:space-between}
-    .info{color:var(--muted);font-size:13px}
-    .bet-box{display:flex;gap:8px;align-items:center}
-    input[type="number"]{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--accent);width:120px}
-    .small{font-size:13px;color:var(--muted)}
-    .win{color:#7fff7f;font-weight:800}
-    .lose{color:var(--danger);font-weight:800}
-    @media (max-width:720px){ .row{flex-direction:column} .card{width:72px;height:96px} }
+    .wrap {
+      max-width: 960px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 24px;
+      color: #48b0ff;
+      margin-bottom: 12px;
+    }
+    .table {
+      background: #06273f;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .area {
+      flex: 1;
+      background: #08314a;
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .hand-title {
+      font-size: 13px;
+      color: #9bd6ff;
+      margin-bottom: 8px;
+    }
+    .hand {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .card {
+      width: 80px;
+      height: 110px;
+      background: #fff;
+      color: #022;
+      border-radius: 8px;
+      padding: 8px;
+      font-weight: bold;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card.red { color: #c62828; }
+    .card .top, .card .bot { font-size: 14px; }
+    .card .center { font-size: 28px; text-align: center; }
+    .controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    button {
+      background: linear-gradient(180deg,#48b0ff,#1e90ff);
+      border: none;
+      color: #001;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.06);
+      color: #9bd6ff;
+    }
+    .status {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #9bd6ff;
+    }
+    .small {
+      font-size: 13px;
+      color: #9bd6ff;
+    }
+    .win { color: #7fff7f; font-weight: bold; }
+    .lose { color: #ff6b6b; font-weight: bold; }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <header>
-      <h1>Blackjack</h1>
-      <div class="info">Single player vs dealer — Balance persisted to cookie "balance"</div>
-    </header>
-
-    <div class="table" role="main" aria-label="Blackjack table">
+    <h1>Blackjack</h1>
+    <div class="table">
       <div class="row">
-        <div class="area" id="playerArea">
+        <div class="area">
           <div class="hand-title">Player</div>
-          <div id="playerHand" class="hand" aria-live="polite"></div>
-          <div id="playerValue" class="small" style="margin-top:10px;color:var(--muted)"></div>
+          <div id="playerHand" class="hand"></div>
+          <div id="playerValue" class="small"></div>
         </div>
-
-        <div class="area" id="dealerArea">
+        <div class="area">
           <div class="hand-title">Dealer</div>
-          <div id="dealerHand" class="hand" aria-live="polite"></div>
-          <div id="dealerValue" class="small" style="margin-top:10px;color:var(--muted)"></div>
+          <div id="dealerHand" class="hand"></div>
+          <div id="dealerValue" class="small"></div>
         </div>
       </div>
 
-      <div class="controls" style="margin-top:14px">
+      <div class="controls">
         <button id="dealBtn">Deal</button>
         <button id="hitBtn" class="btn-ghost" disabled>Hit</button>
         <button id="standBtn" class="btn-ghost" disabled>Stand</button>
         <button id="doubleBtn" class="btn-ghost" disabled>Double</button>
-        <button id="resetBtn" class="btn-ghost">Reset Bank</button>
-
-        <div style="margin-left:auto" class="bet-box">
-          <div class="small">Bank:</div>
-          <div id="bankDisplay" class="small" style="font-weight:800;margin-right:12px">$1000</div>
-          <div class="small">Bet:</div>
-          <input id="betInput" type="number" min="1" step="1" value="25" aria-label="Bet amount" />
-        </div>
+        <div style="margin-left:auto" class="small">Bank: <span id="bankDisplay">$0</span></div>
+        <input id="betInput" type="number" min="1" value="25" style="width:80px;padding:6px;border-radius:6px;border:none;background:#072a3f;color:#cfefff" />
       </div>
 
-      <div class="status" id="status">Click Deal to start.</div>
-
-      <div class="bottom-row">
-        <div class="small">Rules: Dealer hits soft 16; Blackjack pays 3:2; Double allowed on first two cards only.</div>
-        <div class="small">Version: persistent-balance demo</div>
-      </div>
+      <div id="status" class="status">Click Deal to start.</div>
     </div>
   </div>
 
   <script>
-    // --- Cookie helpers (simple, path=/)
-    function readCookie(name){
-      try{
-        const m = document.cookie.split(';').map(s=>s.trim()).find(s=>s.startsWith(name+'='));
-        if(!m) return null;
-        return decodeURIComponent(m.split('=').slice(1).join('='));
-      }catch(e){ return null; }
-    }
-    function setCookie(name, value, days = 365){
-      const expires = new Date(Date.now() + days*24*60*60*1000).toUTCString();
-      document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(String(value))}; expires=${expires}; path=/`;
-    }
-
-    // --- Blackjack core
     const SUITS = ['♠','♥','♦','♣'];
     const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+    const COOKIE_NAME = 'balance';
 
-    function buildDeck(shuffleTimes = 1){
-      const deck = [];
-      for(const s of SUITS){
-        for(const r of RANKS){
-          deck.push({suit:s, rank:r});
-        }
-      }
-      for(let i=0;i<shuffleTimes;i++) shuffle(deck);
-      return deck;
-    }
-    function shuffle(arr){
-      for(let i=arr.length-1;i>0;i--){
-        const j = Math.floor(Math.random()*(i+1));
-        [arr[i],arr[j]] = [arr[j],arr[i]];
-      }
-      return arr;
-    }
-    function cardValue(card){
-      if(card.rank === 'A') return 11;
-      if(['J','Q','K'].includes(card.rank)) return 10;
-      return Number(card.rank);
-    }
-    function handValue(cards){
-      let total=0, aces=0;
-      for(const c of cards){ if(c.rank==='A'){ aces++; total+=11; } else total+=cardValue(c); }
-      while(total>21 && aces>0){ total-=10; aces--; }
-      return total;
-    }
-    function isBlackjack(cards){ return cards.length===2 && handValue(cards)===21; }
+    let deck = [], dealer = [], player = [];
+    let bank = 0;
+    let currentBet = 25;
+    let inRound = false;
+    let doubled = false;
 
-    // --- UI
     const dealerHandEl = document.getElementById('dealerHand');
     const playerHandEl = document.getElementById('playerHand');
     const dealerValueEl = document.getElementById('dealerValue');
     const playerValueEl = document.getElementById('playerValue');
+    const bankDisplay = document.getElementById('bankDisplay');
     const statusEl = document.getElementById('status');
     const dealBtn = document.getElementById('dealBtn');
     const hitBtn = document.getElementById('hitBtn');
     const standBtn = document.getElementById('standBtn');
     const doubleBtn = document.getElementById('doubleBtn');
     const betInput = document.getElementById('betInput');
-    const bankDisplay = document.getElementById('bankDisplay');
-    const resetBtn = document.getElementById('resetBtn');
 
-    let deck=[], dealer=[], player=[];
-    let bank = 1000;
-    let currentBet = 25;
-    let inRound = false;
-    let doubled = false;
-    const COOKIE_NAME = 'balance';
-
-    // Persist current bank to cookie immediately
-    function persistBank(){
-      try { setCookie(COOKIE_NAME, bank); } catch(e){ /* ignore */ }
-      bankDisplay.textContent = '$' + bank;
+    function readCookie(name) {
+      const m = document.cookie.split(';').map(s => s.trim()).find(s => s.startsWith(name + '='));
+      return m ? decodeURIComponent(m.split('=').slice(1).join('=')) : null;
     }
 
-    function renderCard(card, hidden=false){
-      const el = document.createElement('div');
-      el.className = 'card';
-      if(card.suit === '♥' || card.suit === '♦') el.classList.add('red'); else el.classList.add('blue');
-      if(hidden){
-        el.style.background = 'linear-gradient(180deg,#0a1b2d,#071428)'; el.style.color = '#8fbbe6';
-        el.innerHTML = `<div class="top">?</div><div class="center">?</div><div class="bot">?</div>`; return el;
+    function setCookie(name, value, days = 365) {
+      const expires = new Date(Date.now() + days * 864e5).toUTCString();
+      document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+    }
+
+    function buildDeck() {
+      const d = [];
+      for (const s of SUITS) for (const r of RANKS) d.push({ suit: s, rank: r });
+      for (let i = d.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [d[i], d[j]] = [d[j], d[i]];
       }
-      el.innerHTML = `<div class="top">${card.rank}${card.suit}</div><div class="center">${card.suit}</div><div class="bot">${card.suit}${card.rank}</div>`;
+      return d;
+    }
+
+    function cardValue(c) {
+      if (c.rank === 'A') return 11;
+      if (['J','Q','K'].includes(c.rank)) return 10;
+      return Number(c.rank);
+    }
+
+    function handValue(cards) {
+      let total = 0, aces = 0;
+      for (const c of cards) {
+        if (c.rank === 'A') { aces++; total += 11; }
+        else total += cardValue(c);
+      }
+      while (total > 21 && aces > 0) { total -= 10; aces--; }
+      return total;
+    }
+
+    function isBlackjack(cards) {
+      return cards.length === 2 && handValue(cards) === 21;
+    }
+
+    function renderCard(c, hidden = false) {
+      const el = document.createElement('div');
+      el.className = 'card' + ((c.suit === '♥' || c.suit === '♦') ? ' red' : ' blue');
+      el.innerHTML = hidden
+        ? `<div class="top">?</div><div class="center">?</div><div class="bot">?</div>`
+        : `<div class="top">${c.rank}${c.suit}</div><div class="center">${c.suit}</div><div class="bot">${c.suit}${c.rank}</div>`;
       return el;
     }
 
-    function updateUI(showDealerHole=false){
-      dealerHandEl.innerHTML=''; playerHandEl.innerHTML='';
-      dealer.forEach((c, idx)=> dealerHandEl.appendChild(renderCard(c, (idx===1 && !showDealerHole && inRound))));
-      player.forEach(c=> playerHandEl.appendChild(renderCard(c,false)));
+    function updateUI(showDealer = false) {
+      dealerHandEl.innerHTML = '';
+      playerHandEl.innerHTML = '';
+      dealer.forEach((c, i) => dealerHandEl.appendChild(renderCard(c, i === 1 && !showDealer && inRound)));
+      player.forEach(c => playerHandEl.appendChild(renderCard(c)));
+      dealerValueEl.textContent = showDealer ? 'Value: ' + handValue(dealer) : 'Value: ?';
       playerValueEl.textContent = 'Value: ' + handValue(player);
-      if(showDealerHole) dealerValueEl.textContent = 'Value: ' + handValue(dealer);
-      else {
-        const visible = dealer.length>0 ? cardValue(dealer[0]) : 0;
-        dealerValueEl.textContent = 'Value: ' + visible + ' + ?';
-      }
-      persistBank();
+      bankDisplay.textContent = '$' + bank;
     }
 
-    function setStatus(text, cls=''){ statusEl.textContent = text; statusEl.className = 'status ' + (cls||''); }
-
-    function enableActionButtons(enable){
-      hitBtn.disabled = !enable; standBtn.disabled = !enable; doubleBtn.disabled = !enable;
-      if(!enable){ hitBtn.classList.add('btn-ghost'); standBtn.classList.add('btn-ghost'); doubleBtn.classList.add('btn-ghost'); }
-      else { hitBtn.classList.remove('btn-ghost'); standBtn.classList.remove('btn-ghost'); doubleBtn.classList.remove('btn-ghost'); }
+    function setStatus(msg, cls = '') {
+      statusEl.textContent = msg;
+      statusEl.className = 'status ' + cls;
     }
 
-    // --- game flow (ensure persistBank called after any bank change)
-    function startRound(){
-      if(inRound) return;
-      currentBet = Math.max(1, Math.floor(Number(betInput.value) || 0));
-      if(currentBet > bank){ setStatus('Bet exceeds bank', 'lose'); return; }
-      if(currentBet <= 0){ setStatus('Set a bet above 0', 'lose'); return; }
-      // Deduct bet and persist immediately
-      bank -= currentBet; persistBank();
-      doubled = false;
-
-      if(!deck || deck.length < 15) deck = buildDeck(3);
-
-      dealer=[]; player=[];
-      player.push(deck.pop()); dealer.push(deck.pop()); player.push(deck.pop()); dealer.push(deck.pop());
-      inRound = true; updateUI(false);
-
-      const pBJ = isBlackjack(player), dBJ = isBlackjack(dealer);
-      if(pBJ || dBJ){
-        updateUI(true);
-        if(pBJ && !dBJ){
-          const payout = Math.floor(currentBet * 1.5);
-          bank += currentBet + payout; // return stake + payout
-          persistBank();
-          setStatus('Blackjack! You win $' + payout + '!', 'win');
-        } else if(dBJ && !pBJ){
-          setStatus('Dealer has Blackjack. You lose.', 'lose');
-        } else {
-          bank += currentBet; persistBank(); setStatus('Push (both Blackjack).', '');
-        }
-        inRound = false; enableActionButtons(false); updateUI(true); return;
-      }
-
-      setStatus('Your move. Hit, Stand, or Double.', ''); enableActionButtons(true);
-      doubleBtn.disabled = !(player.length === 2 && currentBet*2 <= bank + currentBet);
+    function enableActions(on) {
+      hitBtn.disabled = !on;
+      standBtn.disabled = !on;
+      doubleBtn.disabled = !on;
     }
 
-    function playerHit(){
-      if(!inRound) return;
-      player.push(deck.pop()); updateUI(false);
-      const val = handValue(player);
-      if(val > 21){
-        setStatus('Busted! You lose.', 'lose');
-        inRound = false; enableActionButtons(false); updateUI(true);
-      } else {
-        setStatus('Your move. Hit or Stand.', '');
-      }
-    }
-
-    function playerDouble(){
-      if(!inRound) return;
-      if(player.length !== 2){ setStatus('Double allowed only on first two cards', ''); return; }
-      // Ensure enough bank to double: currentBet already removed from bank earlier
-      if(currentBet > bank){ setStatus('Not enough bank to double', ''); return; }
-      // Deduct extra equal to currentBet and persist
-      bank -= currentBet; currentBet *= 2; persistBank();
-      doubled = true;
-      player.push(deck.pop()); updateUI(false);
-      if(handValue(player) > 21){
-        setStatus('Busted after double! You lose.', 'lose'); inRound = false; enableActionButtons(false); updateUI(true);
-      } else {
-        dealerTurn();
-      }
-    }
-
-    function playerStand(){ if(!inRound) return; dealerTurn(); }
-
-    function dealerTurn(){
-      enableActionButtons(false); updateUI(true);
-      while(true){
-        const val = handValue(dealer);
-        if(val < 17){ dealer.push(deck.pop()); updateUI(true); continue; }
-        break;
-      }
-      resolveRound();
-    }
-
-    function resolveRound(){
-      const p = handValue(player), d = handValue(dealer);
-      updateUI(true);
-      if(p > 21){
-        setStatus('You busted. Lose.', 'lose');
-      } else if(d > 21){
-        bank += currentBet * 2; // win: return stake + payout (stake already removed)
-        persistBank();
-        setStatus('Dealer busted. You win $' + currentBet + '!', 'win');
-      } else if(p > d){
-        bank += currentBet * 2;
-        persistBank();
-        setStatus('You win $' + currentBet + '!', 'win');
-      } else if(p < d){
-        setStatus('Dealer wins. You lose.', 'lose');
-      } else {
-        bank += currentBet; persistBank();
-        setStatus('Push. Bet returned.', '');
-      }
-      inRound = false; enableActionButtons(false); updateUI(true);
-    }
-
-    function resetBank(){
-      if(!confirm('Reset bank to $1000?')) return;
-      bank = 1000; setCookie(COOKIE_NAME, bank); currentBet = Number(betInput.value) || 25; setStatus('Bank reset.'); updateUI(true);
-    }
-
-    // --- UI wiring
-    dealBtn.addEventListener('click', startRound);
-    hitBtn.addEventListener('click', playerHit);
-    standBtn.addEventListener('click', playerStand);
-    doubleBtn.addEventListener('click', playerDouble);
-    resetBtn.addEventListener('click', resetBank);
-    window.addEventListener('keydown', (e) => {
-      if(e.key==='h' || e.key==='H') playerHit();
-      if(e.key==='s' || e.key==='S') playerStand();
-      if(e.key==='d' || e.key==='D') playerDouble();
-      if(e.key==='Enter'){ if(!inRound) startRound(); }
-    });
-
-    // --- init: read cookie balance (fallback 1000)
-    (function boot(){
-      const raw = readCookie(COOKIE_NAME);
-      const parsed = raw !== null ? Number(raw) : NaN;
-      if(!Number.isFinite(parsed) || isNaN(parsed)) bank = 1000;
-      else bank = Math.max(0, Math.floor(parsed));
-      deck = buildDeck(3); dealer=[]; player=[];
-      persistBank();
-      setStatus('Click Deal to start.'); enableActionButtons(false); updateUI(false);
-    })();
-  </script>
-</body>
-</html>
+    function startRound() {
+      if (in

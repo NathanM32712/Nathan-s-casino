@@ -5,17 +5,10 @@
   <title>Blackjack</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    :root {
-      --bg: #031026;
-      --fg: #cfefff;
-      --accent: #48b0ff;
-      --muted: #9bd6ff;
-      --danger: #ff6b6b;
-    }
     body {
       margin: 0;
-      background: var(--bg);
-      color: var(--fg);
+      background: #031026;
+      color: #cfefff;
       font-family: Segoe UI, Roboto, system-ui, sans-serif;
     }
     .wrap {
@@ -31,11 +24,11 @@
     }
     h1 {
       font-size: 24px;
-      color: var(--accent);
+      color: #48b0ff;
       margin: 0;
     }
     .home-btn {
-      background: var(--accent);
+      background: #48b0ff;
       color: #001;
       border: none;
       padding: 8px 12px;
@@ -61,7 +54,7 @@
     }
     .hand-title {
       font-size: 13px;
-      color: var(--muted);
+      color: #9bd6ff;
       margin-bottom: 8px;
     }
     .hand {
@@ -92,7 +85,7 @@
       align-items: center;
     }
     button {
-      background: linear-gradient(180deg,var(--accent),#1e90ff);
+      background: linear-gradient(180deg,#48b0ff,#1e90ff);
       border: none;
       color: #001;
       padding: 10px 14px;
@@ -103,26 +96,26 @@
     .btn-ghost {
       background: transparent;
       border: 1px solid rgba(255,255,255,0.06);
-      color: var(--muted);
+      color: #9bd6ff;
     }
     .status {
       margin-top: 12px;
       font-size: 14px;
-      color: var(--muted);
+      color: #9bd6ff;
     }
     .small {
       font-size: 13px;
-      color: var(--muted);
+      color: #9bd6ff;
     }
     .win { color: #7fff7f; font-weight: bold; }
-    .lose { color: var(--danger); font-weight: bold; }
+    .lose { color: #ff6b6b; font-weight: bold; }
     input[type="number"] {
       width: 80px;
       padding: 6px;
       border-radius: 6px;
       border: none;
       background: #072a3f;
-      color: var(--fg);
+      color: #cfefff;
     }
   </style>
 </head>
@@ -235,4 +228,5 @@
     function updateUI(showDealer = false) {
       dealerHandEl.innerHTML = '';
       playerHandEl.innerHTML = '';
-      dealer.forEach((c, i) => dealer
+      dealer.forEach((c, i) => dealerHandEl.appendChild(renderCard(c, i === 1 && !showDealer && inRound)));
+      player.forEach(c => playerHandEl.append

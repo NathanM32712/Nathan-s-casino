@@ -2,170 +2,131 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Admin Panel</title>
+  <title>Login</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
     body {
       margin: 0;
-      background: #021a30;
+      padding: 0;
+      font-family: sans-serif;
+      background: #021018;
       color: #cfefff;
-      font-family: Segoe UI, Roboto, system-ui, sans-serif;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      height:100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
-    .card {
-      width: 480px;
-      background:#06273f;
-      border-radius:12px;
-      padding:20px;
-      box-shadow:0 8px 30px rgba(0,0,0,0.6);
+    .box {
+      background: #031a2a;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,170,255,0.2);
+      width: 320px;
     }
-    h2 { margin:0 0 12px 0; color:#48b0ff; }
-    p { margin:6px 0; color:#9bd6ff; }
-    input[type="text"], input[type="number"] {
-      width:100%;
-      padding:10px;
-      border-radius:8px;
-      border:none;
-      background:#08314a;
-      color:#cfefff;
-      margin-top:8px;
-      box-sizing:border-box;
+    h1 {
+      margin: 0 0 12px;
+      font-size: 20px;
+      color: #00aaff;
+    }
+    input {
+      width: 100%;
+      margin-bottom: 12px;
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+      background: #072a3f;
+      color: #cfefff;
     }
     button {
-      margin-top:12px;
-      width:100%;
-      padding:10px;
-      border-radius:8px;
-      border:none;
-      background:linear-gradient(180deg,#48b0ff,#1e90ff);
-      color:#001;
-      font-weight:bold;
-      cursor:pointer;
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      background: #00aaff;
+      color: #001;
+      font-weight: bold;
+      cursor: pointer;
     }
-    .danger { background:linear-gradient(180deg,#ff8a8a,#ff5a5a); }
-    .small { font-size:13px; color:#9bd6ff; margin-top:8px; }
-    .row { display:flex; gap:8px; }
-    .row > * { flex:1; }
+    .msg {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #7fbfdc;
+      word-break: break-word;
+    }
   </style>
 </head>
 <body>
-  <div class="card" id="card" aria-live="polite">
-    <h2>Admin Panel</h2>
-    <p id="status">Checking credentials...</p>
-
-    <div id="adminUI" style="display:none;">
-      <p>Operator ID in use: <strong id="showId"></strong></p>
-
-      <label class="small">Set slotsBalance (USD)</label>
-      <input id="balanceInput" type="number" min="0" step="0.01" />
-
-      <label class="small">Set device-id (writes to localStorage['device-id'])</label>
-      <div class="row">
-        <input id="deviceIdInput" type="text" placeholder="enter device-id here" />
-        <button id="saveDeviceIdBtn" style="width:auto;padding:8px 12px">Save</button>
-      </div>
-
-      <label class="small">Optional: Set a different userId (writes to localStorage.userId)</label>
-      <input id="userIdInput" type="text" placeholder="leave blank to keep current" />
-
-      <button id="setBalanceBtn">Set Balance</button>
-      <button id="logoutBtn" class="danger">Clear stored ID and go Home</button>
-
-      <p class="small">Note: balance stored as localStorage key <strong>slotsBalance</strong>.</p>
-    </div>
+  <div class="box">
+    <h1>Login</h1>
+    <input id="user" placeholder="Username" />
+    <input id="pass" placeholder="Password" type="password" />
+    <input id="name" placeholder="Display Name" />
+    <button id="go">Login</button>
+    <div class="msg" id="msg"></div>
   </div>
 
   <script>
-    (function(){
-      // Replace these with your real operator IDs
-      const ALLOWED_IDS = ['device-LOOK-HERE-IM-AN-ADMIN-IM-BETTER-THAN-YOU','device-dofbybi8','device-ul5qv0ul','device-5jfqchm9',];
+    const msg = document.getElementById('msg');
+    const go = document.getElementById('go');
 
-      const BALANCE_KEY = 'slotsBalance';
-      const statusEl = document.getElementById('status');
-      const adminUI = document.getElementById('adminUI');
-      const showId = document.getElementById('showId');
-      const balanceInput = document.getElementById('balanceInput');
-      const userIdInput = document.getElementById('userIdInput');
-      const deviceIdInput = document.getElementById('deviceIdInput');
-      const saveDeviceIdBtn = document.getElementById('saveDeviceIdBtn');
-      const setBalanceBtn = document.getElementById('setBalanceBtn');
-      const logoutBtn = document.getElementById('logoutBtn');
+    function getCookie(name) {
+      const m = document.cookie.split(';').map(s => s.trim()).find(s => s.startsWith(name + '='));
+      return m ? decodeURIComponent(m.split('=').slice(1).join('=')) : null;
+    }
 
-      function readLocal(key) {
-        try { return localStorage.getItem(key); } catch(e) { return null; }
+    function setCookie(name, value, days = 365) {
+      const expires = new Date(Date.now() + days * 864e5).toUTCString();
+      document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+    }
+
+    function generateId() {
+      return 'id-' + Math.random().toString(36).slice(2, 10);
+    }
+
+    function saveDeviceId(id) {
+      try {
+        localStorage.setItem('device-id', id);
+      } catch (e) {}
+    }
+
+    const existing = getCookie('localaccount');
+    if (existing) {
+      try {
+        const obj = JSON.parse(existing);
+        if (!obj.id || obj.id === 'unknown') {
+          obj.id = generateId();
+          setCookie('localaccount', JSON.stringify(obj));
+          saveDeviceId(obj.id);
+        } else {
+          saveDeviceId(obj.id);
+        }
+        msg.textContent = `Welcome ${obj.displayname}! Your ID is: ${obj.id}`;
+        setTimeout(() => location.href = 'home.html', 1500);
+      } catch (e) {
+        msg.textContent = 'Corrupt cookie. Please log in again.';
       }
+    }
 
-      function writeLocal(key, val) {
-        try { localStorage.setItem(key, val); return true; } catch(e) { return false; }
-      }
-
-      // Priority: localStorage['device-id'] -> localStorage.userId -> prompt
-      function getOperatorId() {
-        let id = readLocal('device-id');
-        if (id && id.trim()) return id.trim();
-        id = readLocal('userId');
-        if (id && id.trim()) return id.trim();
-        id = prompt('Enter your operator ID:') || '';
-        id = id.trim();
-        if (id) writeLocal('userId', id);
-        return id || null;
-      }
-
-      const id = getOperatorId();
-      if (!id) {
-        statusEl.textContent = 'No operator id provided. Redirecting...';
-        setTimeout(() => window.location.href = 'home.html', 600);
+    go.addEventListener('click', () => {
+      const user = document.getElementById('user').value.trim();
+      const pass = document.getElementById('pass').value.trim();
+      const name = document.getElementById('name').value.trim();
+      if (!user || !pass || !name) {
+        msg.textContent = 'Please fill all fields.';
         return;
       }
-
-      // check whitelist
-      const allowed = ALLOWED_IDS.includes(id);
-
-      if (!allowed) {
-        statusEl.textContent = 'Access denied. Redirecting...';
-        setTimeout(() => window.location.href = 'home.html', 600);
-        return;
-      }
-
-      // allowed -> show UI
-      statusEl.style.display = 'none';
-      adminUI.style.display = 'block';
-      showId.textContent = id;
-
-      // Populate current balance and device-id
-      const current = parseFloat(readLocal(BALANCE_KEY));
-      balanceInput.value = isNaN(current) ? '' : current.toFixed(2);
-      deviceIdInput.value = readLocal('device-id') || '';
-
-      saveDeviceIdBtn.addEventListener('click', () => {
-        const v = deviceIdInput.value.trim();
-        if (!v) { alert('Enter a device-id to save.'); return; }
-        if (!writeLocal('device-id', v)) { alert('Failed to save device-id.'); return; }
-        alert('device-id saved.');
-      });
-
-      setBalanceBtn.addEventListener('click', () => {
-        const val = Number(balanceInput.value);
-        if (!isFinite(val) || val < 0) { alert('Enter a valid non-negative number for balance.'); return; }
-        if (!writeLocal(BALANCE_KEY, val.toFixed(2))) { alert('Unable to write to localStorage.'); return; }
-        const newUserId = userIdInput.value.trim();
-        if (newUserId) writeLocal('userId', newUserId);
-        alert('Balance updated.');
-      });
-
-      logoutBtn.addEventListener('click', () => {
-        try { localStorage.removeItem('userId'); } catch(e){}
-        window.location.href = 'home.html';
-      });
-    })();
+      const id = generateId();
+      const obj = {
+        username: user,
+        pass,
+        displayname: name,
+        id
+      };
+      setCookie('localaccount', JSON.stringify(obj));
+      saveDeviceId(id);
+      msg.textContent = `Welcome ${name}! Your ID is: ${id}`;
+      setTimeout(() => location.href = 'home.html', 1500);
+    });
   </script>
 </body>
-
 </html>
-
-
-
-

@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -11,112 +11,28 @@
       color: #cfefff;
       font-family: Segoe UI, Roboto, system-ui, sans-serif;
     }
-    .wrap {
-      max-width: 960px;
-      margin: 40px auto;
-      padding: 20px;
-    }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-    h1 {
-      font-size: 24px;
-      color: #48b0ff;
-      margin: 0;
-    }
-    .home-btn {
-      background: #48b0ff;
-      color: #001;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .table {
-      background: #06273f;
-      border-radius: 12px;
-      padding: 20px;
-    }
-    .row {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-    .area {
-      flex: 1;
-      background: #08314a;
-      border-radius: 10px;
-      padding: 12px;
-    }
-    .hand-title {
-      font-size: 13px;
-      color: #9bd6ff;
-      margin-bottom: 8px;
-    }
-    .hand {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .card {
-      width: 80px;
-      height: 110px;
-      background: #fff;
-      color: #022;
-      border-radius: 8px;
-      padding: 8px;
-      font-weight: bold;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.5);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    .card.red { color: #c62828; }
-    .card .top, .card .bot { font-size: 14px; }
-    .card .center { font-size: 28px; text-align: center; }
-    .controls {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-      align-items: center;
-    }
-    button {
-      background: linear-gradient(180deg,#48b0ff,#1e90ff);
-      border: none;
-      color: #001;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .btn-ghost {
-      background: transparent;
-      border: 1px solid rgba(255,255,255,0.06);
-      color: #9bd6ff;
-    }
-    .status {
-      margin-top: 12px;
-      font-size: 14px;
-      color: #9bd6ff;
-    }
-    .small {
-      font-size: 13px;
-      color: #9bd6ff;
-    }
-    .win { color: #7fff7f; font-weight: bold; }
-    .lose { color: #ff6b6b; font-weight: bold; }
-    input[type="number"] {
-      width: 80px;
-      padding: 6px;
-      border-radius: 6px;
-      border: none;
-      background: #072a3f;
-      color: #cfefff;
-    }
+    .wrap { max-width: 960px; margin: 40px auto; padding: 20px; }
+    header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+    h1 { font-size:24px; color:#48b0ff; margin:0; }
+    .home-btn { background:#48b0ff; color:#001; border:none; padding:8px 12px; border-radius:8px; font-weight:bold; cursor:pointer; }
+    .table { background:#06273f; border-radius:12px; padding:20px; }
+    .row { display:flex; gap:12px; margin-bottom:20px; }
+    .area { flex:1; background:#08314a; border-radius:10px; padding:12px; }
+    .hand-title { font-size:13px; color:#9bd6ff; margin-bottom:8px; }
+    .hand { display:flex; gap:8px; flex-wrap:wrap; min-height:120px; }
+    .card { width:80px; height:110px; background:#fff; color:#022; border-radius:8px; padding:8px; font-weight:bold; box-shadow:0 6px 18px rgba(0,0,0,0.5); display:flex; flex-direction:column; justify-content:space-between; }
+    .card.red { color:#c62828; }
+    .card .top, .card .bot { font-size:14px; }
+    .card .center { font-size:28px; text-align:center; }
+    .controls { display:flex; gap:8px; margin-bottom:12px; align-items:center; flex-wrap:wrap; }
+    button { background:linear-gradient(180deg,#48b0ff,#1e90ff); border:none; color:#001; padding:10px 14px; border-radius:8px; font-weight:bold; cursor:pointer; }
+    .btn-ghost { background:transparent; border:1px solid rgba(255,255,255,0.06); color:#9bd6ff; }
+    .status { margin-top:12px; font-size:14px; color:#9bd6ff; min-height:1.2em; }
+    .small { font-size:13px; color:#9bd6ff; }
+    .win { color:#7fff7f; font-weight:bold; }
+    .lose { color:#ff6b6b; font-weight:bold; }
+    input[type="number"] { width:100px; padding:6px; border-radius:6px; border:none; background:#072a3f; color:#cfefff; }
+    .flex-right { margin-left:auto; display:flex; gap:8px; align-items:center; }
   </style>
 </head>
 <body>
@@ -145,8 +61,11 @@
         <button id="hitBtn" class="btn-ghost" disabled>Hit</button>
         <button id="standBtn" class="btn-ghost" disabled>Stand</button>
         <button id="doubleBtn" class="btn-ghost" disabled>Double</button>
-        <div class="small">Bank: <span id="bankDisplay">$0</span></div>
-        <input id="betInput" type="number" min="1" value="25" />
+
+        <div class="flex-right">
+          <div class="small">Bank: <span id="bankDisplay">$0</span></div>
+          <input id="betInput" type="number" min="1" value="25" />
+        </div>
       </div>
 
       <div id="status" class="status">Click Deal to start.</div>
@@ -156,7 +75,7 @@
   <script>
     const SUITS = ['♠','♥','♦','♣'];
     const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
-    const COOKIE_NAME = 'balance';
+    const BALANCE_KEY = 'slotsBalance';
 
     let deck = [], dealer = [], player = [];
     let bank = 0;
@@ -176,14 +95,16 @@
     const doubleBtn = document.getElementById('doubleBtn');
     const betInput = document.getElementById('betInput');
 
-    function readCookie(name) {
-      const m = document.cookie.split(';').map(s => s.trim()).find(s => s.startsWith(name + '='));
-      return m ? decodeURIComponent(m.split('=').slice(1).join('=')) : null;
+    function getSlotsBalance() {
+      return parseFloat(localStorage.getItem(BALANCE_KEY)) || 1000;
     }
 
-    function setCookie(name, value, days = 365) {
-      const expires = new Date(Date.now() + days * 864e5).toUTCString();
-      document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+    function setSlotsBalance(amount) {
+      localStorage.setItem(BALANCE_KEY, amount.toFixed(2));
+    }
+
+    function updateBankDisplay() {
+      bankDisplay.textContent = `$${bank.toFixed(2)}`;
     }
 
     function buildDeck() {
@@ -205,8 +126,7 @@
     function handValue(cards) {
       let total = 0, aces = 0;
       for (const c of cards) {
-        if (c.rank === 'A') { aces++; total += 11; }
-        else total += cardValue(c);
+        if (c.rank === 'A') { aces++; total += 11; } else total += cardValue(c);
       }
       while (total > 21 && aces > 0) { total -= 10; aces--; }
       return total;
@@ -218,15 +138,198 @@
 
     function renderCard(c, hidden = false) {
       const el = document.createElement('div');
-      el.className = 'card' + ((c.suit === '♥' || c.suit === '♦') ? ' red' : ' blue');
+      el.className = 'card' + ((c.suit === '♥' || c.suit === '♦') ? ' red' : '');
       el.innerHTML = hidden
         ? `<div class="top">?</div><div class="center">?</div><div class="bot">?</div>`
         : `<div class="top">${c.rank}${c.suit}</div><div class="center">${c.suit}</div><div class="bot">${c.suit}${c.rank}</div>`;
       return el;
     }
 
+    function resetRoundUI() {
+      dealerHandEl.innerHTML = '';
+      playerHandEl.innerHTML = '';
+      dealerValueEl.textContent = '';
+      playerValueEl.textContent = '';
+      statusEl.textContent = 'Click Deal to start.';
+      hitBtn.disabled = true;
+      standBtn.disabled = true;
+      doubleBtn.disabled = true;
+      dealBtn.disabled = false;
+      betInput.disabled = false;
+    }
+
+    function startRound() {
+      currentBet = Math.max(1, Math.floor(Number(betInput.value) || 1));
+      if (currentBet > bank) {
+        statusEl.textContent = 'Insufficient funds for that bet.';
+        return;
+      }
+
+      deck = buildDeck();
+      dealer = [];
+      player = [];
+      doubled = false;
+      inRound = true;
+
+      // remove bet from bank
+      bank -= currentBet;
+      setSlotsBalance(bank);
+      updateBankDisplay();
+
+      // initial deal
+      player.push(deck.pop());
+      dealer.push(deck.pop());
+      player.push(deck.pop());
+      dealer.push(deck.pop());
+
+      dealBtn.disabled = true;
+      hitBtn.disabled = false;
+      standBtn.disabled = false;
+      // double allowed only as first action and if player can cover doubling (bank currently has remaining after initial deduction)
+      doubleBtn.disabled = !(player.length === 2 && bank >= currentBet);
+      betInput.disabled = true;
+
+      updateUI(false);
+
+      const playerBJ = isBlackjack(player);
+      const dealerBJ = isBlackjack(dealer);
+      if (playerBJ || dealerBJ) setTimeout(() => resolveNaturals(playerBJ, dealerBJ), 300);
+      else statusEl.textContent = 'Your move.';
+    }
+
+    function resolveNaturals(playerBJ, dealerBJ) {
+      updateUI(true);
+      if (playerBJ && dealerBJ) {
+        bank += currentBet; // push
+        setSlotsBalance(bank);
+        updateBankDisplay();
+        statusEl.innerHTML = '<span class="small">Both have Blackjack. Push.</span>';
+      } else if (playerBJ) {
+        const payout = currentBet * 2.5; // pays 3:2 (return + 1.5x)
+        bank += payout;
+        setSlotsBalance(bank);
+        updateBankDisplay();
+        statusEl.innerHTML = '<span class="win">Blackjack! You win.</span>';
+      } else if (dealerBJ) {
+        statusEl.innerHTML = '<span class="lose">Dealer has Blackjack. You lose.</span>';
+      }
+      endRound();
+    }
+
+    function playerHit() {
+      if (!inRound) return;
+      player.push(deck.pop());
+      updateUI(false);
+      if (handValue(player) > 21) {
+        statusEl.innerHTML = '<span class="lose">Bust! You lose.</span>';
+        endRound();
+      } else {
+        doubleBtn.disabled = true;
+      }
+    }
+
+    function playerStand() {
+      if (!inRound) return;
+      dealerPlay();
+    }
+
+    function playerDouble() {
+      if (!inRound || player.length !== 2) return;
+      if (bank < currentBet) { statusEl.textContent = 'Not enough funds to double.'; return; }
+      // deduct extra bet
+      bank -= currentBet;
+      currentBet *= 2;
+      setSlotsBalance(bank);
+      updateBankDisplay();
+      doubled = true;
+      // one card to player then dealer plays
+      player.push(deck.pop());
+      updateUI(false);
+      if (handValue(player) > 21) {
+        statusEl.innerHTML = '<span class="lose">Bust after double! You lose.</span>';
+        endRound();
+      } else {
+        dealerPlay();
+      }
+    }
+
+    function dealerPlay() {
+      updateUI(true);
+      // Dealer hits until 17 or higher. Use "soft 17 stands" (i.e., stop at 17 even if soft).
+      while (handValue(dealer) < 17) dealer.push(deck.pop());
+      const pVal = handValue(player);
+      const dVal = handValue(dealer);
+      if (dVal > 21) {
+        const payout = currentBet * 2;
+        bank += payout;
+        setSlotsBalance(bank);
+        updateBankDisplay();
+        statusEl.innerHTML = '<span class="win">Dealer busts! You win.</span>';
+      } else if (pVal > dVal) {
+        const payout = currentBet * 2;
+        bank += payout;
+        setSlotsBalance(bank);
+        updateBankDisplay();
+        statusEl.innerHTML = '<span class="win">You beat the dealer! You win.</span>';
+      } else if (pVal === dVal) {
+        bank += currentBet; // push
+        setSlotsBalance(bank);
+        updateBankDisplay();
+        statusEl.innerHTML = '<span class="small">Push.</span>';
+      } else {
+        statusEl.innerHTML = '<span class="lose">Dealer wins.</span>';
+      }
+      endRound();
+    }
+
+    function endRound() {
+      inRound = false;
+      hitBtn.disabled = true;
+      standBtn.disabled = true;
+      doubleBtn.disabled = true;
+      dealBtn.disabled = false;
+      betInput.disabled = false;
+      updateUI(true);
+    }
+
     function updateUI(showDealer = false) {
       dealerHandEl.innerHTML = '';
       playerHandEl.innerHTML = '';
       dealer.forEach((c, i) => dealerHandEl.appendChild(renderCard(c, i === 1 && !showDealer && inRound)));
-      player.forEach(c => playerHandEl.append
+      player.forEach(c => playerHandEl.appendChild(renderCard(c)));
+      dealerValueEl.textContent = showDealer ? `Value: ${handValue(dealer)}` : (inRound ? 'Value: ?' : '');
+      playerValueEl.textContent = `Value: ${handValue(player)}`;
+      updateBankDisplay();
+    }
+
+    // Controls
+    dealBtn.addEventListener('click', startRound);
+    hitBtn.addEventListener('click', playerHit);
+    standBtn.addEventListener('click', playerStand);
+    doubleBtn.addEventListener('click', playerDouble);
+
+    function init() {
+      bank = getSlotsBalance();
+      setSlotsBalance(bank);
+      updateBankDisplay();
+      resetRoundUI();
+
+      // sanitize bet input
+      betInput.addEventListener('input', () => {
+        if (betInput.value === '') return;
+        betInput.value = Math.max(1, Math.floor(Number(betInput.value) || 1));
+      });
+    }
+
+    init();
+
+    // keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') { if (!inRound) dealBtn.click(); }
+      if ((e.key === 'h' || e.key === 'H') && !hitBtn.disabled) hitBtn.click();
+      if ((e.key === 's' || e.key === 'S') && !standBtn.disabled) standBtn.click();
+      if ((e.key === 'd' || e.key === 'D') && !doubleBtn.disabled) doubleBtn.click();
+    });
+  </script>
+</body>
+</html>

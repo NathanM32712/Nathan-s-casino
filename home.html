@@ -5,81 +5,51 @@
   <title>Home Launcher</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    :root {
-      --bg: #071018;
-      --fg: #cfefff;
-      --accent: #00aaff;
-      --muted: #7fbfdc;
-    }
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: var(--bg);
-      color: var(--fg);
-      font-family: Segoe UI, Roboto, system-ui, sans-serif;
-    }
-    .wrap {
-      max-width: 880px;
-      margin: 40px auto;
-      padding: 20px;
-    }
-    h1 {
-      font-size: 24px;
-      color: var(--accent);
-      margin-bottom: 12px;
-    }
-    p.lead {
-      color: var(--muted);
-      margin-bottom: 24px;
-    }
-    .grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .btn {
-      background: linear-gradient(180deg, var(--accent), #0088cc);
-      color: #001;
-      border: none;
-      padding: 14px 18px;
-      border-radius: 10px;
-      font-weight: 700;
-      cursor: pointer;
-      min-width: 160px;
-      text-align: left;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.4);
-    }
-    .btn span {
-      display: block;
-      font-size: 13px;
-      color: rgba(0,0,0,0.5);
-      margin-top: 6px;
-    }
-    footer {
-      margin-top: 40px;
-      font-size: 13px;
-      color: var(--muted);
-      text-align: center;
-    }
-    @media (max-width: 600px) {
-      .btn { min-width: 120px; padding: 12px 14px; font-size: 14px; }
-      .grid { justify-content: center; }
-    }
+    :root{--bg:#071018;--fg:#cfefff;--accent:#00aaff;--muted:#7fbfdc}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:Segoe UI, Roboto, system-ui, sans-serif}
+    .wrap{max-width:880px;margin:40px auto;padding:20px}
+    header{margin-bottom:12px}
+    h1{font-size:20px;color:var(--accent);margin:0;word-break:break-all}
+    p.lead{color:var(--muted);margin:8px 0 24px 0}
+    .grid{display:flex;flex-wrap:wrap;gap:12px}
+    .btn{background:linear-gradient(180deg,var(--accent),#0088cc);color:#001;border:none;padding:14px 18px;border-radius:10px;font-weight:700;cursor:pointer;min-width:160px;text-align:left;box-shadow:0 6px 18px rgba(0,0,0,0.4)}
+    .btn span{display:block;font-size:13px;color:rgba(0,0,0,0.5);margin-top:6px}
+    footer{margin-top:40px;font-size:13px;color:var(--muted);text-align:center}
+    a.inline{color:var(--accent);text-decoration:none}
+    @media (max-width:600px){.btn{min-width:120px;padding:12px 14px;font-size:14px}.grid{justify-content:center}}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Game Launcher</h1>
+    <!-- The H1 itself will contain the device-id text -->
+    <header>
+      <h1 id="mainTitle">Game Launcher — device-id: loading…</h1>
+    </header>
+
     <p class="lead">Choose a game or page to open:</p>
 
     <div class="grid">
-      <button class="btn" onclick="location.href='blackjack.html'">Blackjack<span>Play cards vs dealer</span></button>
       <button class="btn" onclick="location.href='updates.html'">Updates<span>Latest changes</span></button>
-      <button class="btn" onclick="location.href='index.html'">Login<span>Account setup</span></button>
-      
+      <button class="btn" onclick="location.href='admin.html'">Admin<span>Operator tools</span></button>
+      <button class="btn" onclick="location.href='blackjack.html'">Blackjack<span>Play cards vs dealer</span></button>
+      <button class="btn" onclick="location.href='plinko.html'">Plinko<span>Drop balls and get money</span></button>
     </div>
 
-    <footer>Made by Nathan — modular, remixable, and ready to expand</footer>
+    <footer>
+      Made by Nathan Marty — questions: 715‑294‑0249 or join the discord<br/>
+      <a class="inline" href="https://discord.gg/k2WmBxetb7">https://discord.gg/k2WmBxetb7</a>
+    </footer>
   </div>
+
+  <script>
+    (function () {
+      const title = document.getElementById('mainTitle');
+      let id = null;
+      try { id = localStorage.getItem('device-id'); } catch (e) { id = null; }
+      const display = id && id.trim() ? id.trim() : 'unknown';
+      // Replace the H1 content so the device-id appears inside the <h1> element itself
+      title.textContent = `Game Launcher — device-id: ${display}`;
+    })();
+  </script>
 </body>
 </html>

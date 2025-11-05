@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Plinko Pyramid</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      margin: 0;
+      background: #021a30;
+      color: #cfefff;
+      font-family: sans-serif;
+      text-align: center;
+    }
+    canvas {
+      display: block;
+      margin: 20px auto;
+      border: 2px solid #0a3d66;
+      background: #031f3a;
+    }
+    input, button {
+      margin: 6px;
+      padding: 6px 12px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+    }
+    #dropBtn {
+      background: #48b0ff;
+      color: #001;
+      font-weight: bold;
+    }
+    #backBtn {
+      background: #0a3d66;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="plinkoCanvas" width="600" height="700"></canvas>
+  <div>
+    <div id="balance">Balance: $1000.00</div>
+    <input id="betInput" type="number" value="10" min="1" />
+    <button id="dropBtn">Drop</button>
+    <button id="backBtn">Home</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('plinkoCanvas');
+    const ctx = canvas.getContext('2d');
+    const pegRows = 12;
+    const BALL_R = 10;
+    const gravity = 0.25;
+    const pegSpacing = 40;
+    const boxCount = 11;
+    const pegs = [];
+    let balls = [];
+
+    const BALANCE_KEY = 'slotsBalance';
+
+    function getBalance() {
+      return parseFloat(localStorage.getItem(BALANCE_KEY)) || 1000;
+    }
+
+    function updateBalance(amount) {
+      const newBalance = getBalance() + amount;
+      localStorage.setItem(BALANCE_KEY, newBalance.toFixed(2));
+      document.getElementById('balance').textContent = `Balance: $${newBalance.toFixed(2)}`;
+    }
+
+    function setupPegs() {
+      pegs.length = 0;
+      const baseY = 80;
+      for (let row = 1; row < pegRows; row++) {
+        for (let col = 0; col <= row; col++) {
+          const x = canvas.width / 2 + (col - row / 2) * pegSpacing;
+          const y = baseY + row * pegSpacing;
+          pegs.push({ x, y, isBox: false });
+        }
+      }
+    }
+
+    function drawBoard() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const centerIndex = Math.floor(boxCount / 2);
+      const startX = canvas.width / 2 - (boxCount - 1) * pegSpacing / 2;
+      const boxY = canvas.height - 40;
+
+      for (let i = 0; i < boxCount; i++) {
+        const x = startX + i * pegSpacing;
+        const steps = Math.abs(i - centerIndex);
+        const multiplier = parseFloat((0.2 * Math.pow(1.75, steps)).toFixed(2));
+
+        ctx.fillStyle = '#0a3d66';
+        ctx.fillRect(x - 15, boxY, 30, 30);
+        ctx.strokeStyle = '#48b0ff';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x - 15, boxY, 30, 30);
+
+        ctx.fillStyle = '#cfefff';
+        ctx.font = '14px sans-serif';
+        ctx.fillText(`${multiplier}×`, x - 16, boxY - 12);
+
+        pegs.push({ x, y: boxY, multiplier, isBox: true });
+      }
+
+      pegs.filter(p => !p.isBox).forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = '#48b0ff';
+        ctx.fill();
+      });
+
+      balls.forEach(ball => {
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, BALL_R, 0, Math.PI * 2);
+        ctx.fillStyle = '#00aaff';
+        ctx.fill();
+      });
+    }
+
+    function dropBall(bet) {
+      const currentBalance = getBalance();
+      if (bet > 0 && bet <= currentBalance) {
+        updateBalance(-bet);
+        const offset = Math.floor(Math.random() * 9) + 1;
+        balls.push({
+          x: canvas.width / 2 + (Math.random() < 0.5 ? -offset : offset),
+          y: 0,
+          vx: 0,
+          vy: 0,
+          bet: bet,
+          active: true
+        });
+      }
+    }
+
+    function updateBalls() {
+      balls.forEach(ball => {
+        if (!ball.active) return;
+
+        ball.vy += gravity;
+        ball.x += ball.vx;
+        ball.y += ball.vy;
+
+        pegs.filter(p => !p.isBox).forEach(p => {
+          const dx = ball.x - p.x;
+          const dy = ball.y - p.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < BALL_R + 5) {
+            const angle = Math.atan2(dy, dx);
+            const overlap = BALL_R + 5 - dist;
+            ball.x += Math.cos(angle) * overlap;
+            ball.y += Math.sin(angle) * overlap;
+            ball.vx += Math.cos(angle) * 0.4;
+            ball.vy = -Math.abs(ball.vy) * 0.3;
+          }
+        });
+
+        if (ball.x < BALL_R || ball.x > canvas.width - BALL_R) {
+          ball.vx *= -0.6;
+          ball.x = Math.max(BALL_R, Math.min(canvas.width - BALL_R, ball.x));
+        }
+
+        if (ball.y > canvas.height - 60) {
+          ball.active = false;
+          const boxes = pegs.filter(p => p.isBox);
+          let closest = boxes[0];
+          let minDist = Math.abs(ball.x - closest.x);
+          for (let p of boxes) {
+            const d = Math.abs(ball.x - p.x);
+            if (d < minDist) {
+              minDist = d;
+              closest = p;
+            }
+          }
+          const payout = parseFloat((ball.bet * closest.multiplier).toFixed(2));
+          updateBalance(payout);
+        }
+      });
+
+      balls = balls.filter(ball => ball.active);
+    }
+
+    function gameLoop() {
+      updateBalls();
+      drawBoard();
+      requestAnimationFrame(gameLoop);
+    }
+
+    document.getElementById('dropBtn').onclick = () => {
+      const bet = parseFloat(document.getElementById('betInput').value);
+      dropBall(bet);
+    };
+
+    document.getElementById('backBtn').onclick = () => {
+      window.location.href = 'home.html';
+    };
+
+    let spamInterval = null;
+    let spamTimeout = null;
+
+    function startSpam(bet) {
+      spamTimeout = setTimeout(() => {
+        spamInterval = setInterval(() => {
+          dropBall(bet);
+        }, 0);
+      }, 1000);
+    }
+
+    function stopSpam() {
+      clearTimeout(spamTimeout);
+      clearInterval(spamInterval);
+      spamTimeout = null;
+      spamInterval = null;
+    }
+
+    const dropBtn = document.getElementById('dropBtn');
+    dropBtn.addEventListener('mousedown', () => {
+      const bet = parseFloat(document.getElementById('betInput').value);
+      dropBall(bet);
+      startSpam(bet);
+    });
+    dropBtn.addEventListener('mouseup', stopSpam);
+    dropBtn.addEventListener('mouseleave', stopSpam);
+
+    let spaceHeld = false;
+    document.addEventListener('keydown', e => {
+      if (e.code === 'Space' && !spaceHeld) {
+        spaceHeld = true;
+        const bet = parseFloat(document.getElementById('betInput').value);
+        dropBall(bet);
+        startSpam(bet);
+      }
+    });
+    document.addEventListener('keyup', e => {
+      if (e.code === 'Space') {
+        spaceHeld = false;
+        stopSpam();
+      }
+    });
+
+    setupPegs();
+    drawBoard();
+    updateBalance(0);
+    gameLoop();
+  </script>
+</body>
+</html>

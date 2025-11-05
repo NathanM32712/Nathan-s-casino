@@ -86,7 +86,7 @@
     if (existing) {
       try {
         const obj = JSON.parse(existing);
-        if (!obj.id) {
+        if (!obj.id || obj.id === 'unknown') {
           obj.id = generateId();
           setCookie('localaccount', JSON.stringify(obj));
         }

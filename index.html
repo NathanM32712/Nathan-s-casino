@@ -51,6 +51,7 @@
       margin-top: 12px;
       font-size: 14px;
       color: #7fbfdc;
+      word-break: break-word;
     }
   </style>
 </head>
@@ -68,11 +69,6 @@
     const msg = document.getElementById('msg');
     const go = document.getElementById('go');
 
-    function getCookie(name) {
-      const m = document.cookie.split(';').map(s => s.trim()).find(s => s.startsWith(name + '='));
-      return m ? decodeURIComponent(m.split('=').slice(1).join('=')) : null;
-    }
-
     function setCookie(name, value, days = 365) {
       const expires = new Date(Date.now() + days * 864e5).toUTCString();
       document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
@@ -82,19 +78,10 @@
       return 'id-' + Math.random().toString(36).slice(2, 10);
     }
 
-    const existing = getCookie('localaccount');
-    if (existing) {
+    function saveDeviceId(id) {
       try {
-        const obj = JSON.parse(existing);
-        if (!obj.id || obj.id === 'unknown') {
-          obj.id = generateId();
-          setCookie('localaccount', JSON.stringify(obj));
-        }
-        msg.textContent = 'Welcome ' + obj.displayname + '! Redirecting...';
-        setTimeout(() => location.href = 'home.html', 1200);
-      } catch (e) {
-        msg.textContent = 'Corrupt cookie. Please log in again.';
-      }
+        localStorage.setItem('device-id', id);
+      } catch (e) {}
     }
 
     go.addEventListener('click', () => {
@@ -105,15 +92,17 @@
         msg.textContent = 'Please fill all fields.';
         return;
       }
+      const id = generateId();
       const obj = {
         username: user,
         pass,
         displayname: name,
-        id: generateId()
+        id
       };
       setCookie('localaccount', JSON.stringify(obj));
-      msg.textContent = 'Welcome ' + name + '! Redirecting...';
-      setTimeout(() => location.href = 'home.html', 1200);
+      saveDeviceId(id);
+      msg.textContent = `Welcome ${name}! Your ID is: ${id}`;
+      setTimeout(() => location.href = 'home.html', 1500);
     });
   </script>
 </body>

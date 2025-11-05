@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Limbo</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{--bg:#071827;--card:#082b3d;--accent:#00c0ff;--win:#46d37a;--lose:#ff6b6b;--muted:#9bd6ff}
+    html,body{height:100%;margin:0;background:var(--bg);color:#e6f8ff;font-family:Segoe UI, Roboto, system-ui}
+    .wrap{max-width:780px;margin:28px auto;padding:20px}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+    h1{margin:0;color:var(--accent);font-size:22px}
+    .row{display:flex;gap:12px;align-items:center}
+    .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
+    input,button{padding:10px;border-radius:8px;border:none;background:#0b3b52;color:#001;font-weight:700;cursor:pointer}
+    input[type="number"]{background:#042633;color:#e6f8ff}
+    button.primary{background:linear-gradient(180deg,var(--accent),#0088cc);color:#001}
+    button.alt{background:linear-gradient(180deg,#ff8a8a,#ff5a5a);color:#fff}
+    .display{font-size:64px;font-weight:900;padding:28px;text-align:center;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.1));margin:18px 0}
+    .small{font-size:13px;color:var(--muted)}
+    .info{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    footer{margin-top:20px;color:var(--muted);font-size:13px;text-align:center}
+    @media (max-width:600px){.display{font-size:48px;padding:20px}.controls{flex-direction:column;align-items:stretch}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Limbo</h1>
+      <div class="row">
+        <div class="card small" style="padding:8px 12px;border-radius:10px">Device: <span id="deviceId">loading…</span></div>
+        <div class="card small" style="padding:8px 12px;border-radius:10px">Balance: $<span id="balance">0.00</span></div>
+        <button id="homeBtn" class="primary">Home</button>
+      </div>
+    </header>
+
+    <div class="card">
+      <div class="display" id="multiplier">1.00x</div>
+
+      <div class="controls">
+        <label class="small">Bet $
+          <input id="bet" type="number" min="0.01" step="0.01" value="1" style="width:120px" />
+        </label>
+
+        <button id="start" class="primary">Start Round</button>
+        <button id="cashout" class="primary" style="display:none">Cash Out</button>
+      </div>
+
+      <div style="margin-top:12px" class="info">
+        <div class="small">Last result: <span id="last">none</span></div>
+        <div class="small">Last payout: $<span id="lastP">0.00</span></div>
+        <div class="small">House seed: <span id="seed">—</span></div>
+      </div>
+      <div class="small" style="margin-top:10px;color:var(--muted)">Note: No auto-cashout. If your balance reaches 0, you cannot reset from this page.</div>
+    </div>
+
+    <footer>Made by Nathan — lightweight Limbo simulator</footer>
+  </div>
+
+  <script>
+    const BAL_KEY = 'slotsBalance';
+    const DEV_KEY = 'device-id';
+    const el = id => document.getElementById(id);
+
+    const deviceEl = el('deviceId');
+    const balanceEl = el('balance');
+    const multEl = el('multiplier');
+    const lastEl = el('last');
+    const lastP = el('lastP');
+    const seedEl = el('seed');
+    const betInput = el('bet');
+    const startBtn = el('start');
+    const cashBtn = el('cashout');
+    const homeBtn = el('homeBtn');
+
+    function readLocal(k){ try{return localStorage.getItem(k);}catch(e){return null;} }
+    function writeLocal(k,v){ try{ localStorage.setItem(k,String(v)); return true;}catch(e){return false;} }
+    function fmt(n){ return Number(n).toFixed(2); }
+
+    // device-id persistence (reuse if exists, else create)
+    function ensureDeviceId(){
+      try{
+        let id = readLocal(DEV_KEY);
+        if(!id || id==='unknown'){ id = 'id-'+Math.random().toString(36).slice(2,10); writeLocal(DEV_KEY,id); }
+        deviceEl.textContent = id;
+      }catch(e){ deviceEl.textContent = 'unknown'; }
+    }
+
+    // balance persistence
+    function getBalance(){ const b = parseFloat(readLocal(BAL_KEY)); return isNaN(b)? 20.00 : b; } // default $20
+    function saveBalance(v){ writeLocal(BAL_KEY, fmt(v)); balanceEl.textContent = fmt(v); }
+
+    ensureDeviceId();
+    let balance = getBalance();
+    saveBalance(balance);
+
+    // Game state
+    let running = false;
+    let currentMultiplier = 1.0;
+    let roundSeed = null;
+    let betAmount = 0;
+    let animationHandle = null;
+
+    function newSeed(){ return Math.random().toString(36).slice(2,9); }
+
+    // Multiplier generator (simulated house edge)
+    function generateCrashPoint(seed){
+      let s = 0;
+      for(let i=0;i<seed.length;i++) s = (s*31 + seed.charCodeAt(i))|0;
+      const r = ((s >>> 0) % 100000) / 100000;
+      const multiplier = Math.max(1.01, Math.floor((1/(1 - r*0.97))*100)/100);
+      return Number(multiplier.toFixed(2));
+    }
+
+    function startRound(){
+      if(running) return;
+      betAmount = parseFloat(betInput.value);
+      if(!isFinite(betAmount) || betAmount <= 0){ alert('Enter a valid bet > 0'); return; }
+      if(betAmount > balance){ alert('Insufficient balance'); return; }
+
+      // consume bet
+      balance -= betAmount;
+      saveBalance(balance);
+      currentMultiplier = 1.00;
+      multEl.textContent = currentMultiplier.toFixed(2)+'x';
+      running = true;
+      startBtn.style.display = 'none';
+      cashBtn.style.display = 'inline-block';
+      roundSeed = newSeed();
+      seedEl.textContent = roundSeed;
+      const crash = generateCrashPoint(roundSeed);
+
+      // animate multiplier rising
+      let t = 0;
+      const speed = 0.02 + Math.random()*0.03;
+      animationHandle = setInterval(()=>{
+        t += speed;
+        currentMultiplier = Math.max(1, Math.exp(t*0.5));
+        if(currentMultiplier > 100) currentMultiplier = 100;
+        multEl.textContent = currentMultiplier.toFixed(2) + 'x';
+
+        // crash check
+        if(currentMultiplier >= crash){
+          doCrash(crash);
+        }
+      }, 60);
+    }
+
+    function doCashout(cashedAt){
+      if(!running) return;
+      clearInterval(animationHandle);
+      running = false;
+      startBtn.style.display = 'inline-block';
+      cashBtn.style.display = 'none';
+      const payout = betAmount * cashedAt;
+      balance += payout;
+      saveBalance(balance);
+      lastEl.textContent = 'WIN @ ' + cashedAt.toFixed(2) + 'x';
+      lastP.textContent = fmt(payout);
+      multEl.textContent = cashedAt.toFixed(2) + 'x';
+    }
+
+    function doCrash(crashPoint){
+      if(!running) return;
+      clearInterval(animationHandle);
+      running = false;
+      startBtn.style.display = 'inline-block';
+      cashBtn.style.display = 'none';
+      lastEl.textContent = 'CRASH @ ' + crashPoint.toFixed(2) + 'x';
+      lastP.textContent = '0.00';
+      multEl.textContent = crashPoint.toFixed(2) + 'x';
+      // bet already removed from balance; no reset here
+    }
+
+    function manualCashout(){
+      if(!running) return;
+      const crash = generateCrashPoint(roundSeed);
+      if(currentMultiplier >= crash){
+        doCrash(crash);
+      } else {
+        doCashout(currentMultiplier);
+      }
+    }
+
+    startBtn.addEventListener('click', startRound);
+    cashBtn.addEventListener('click', manualCashout);
+    homeBtn.addEventListener('click', () => location.href = 'home.html');
+
+    // show saved username (non-blocking)
+    (function showSavedUser(){
+      try{
+        const c = document.cookie.split(';').map(s=>s.trim()).find(s=>s.startsWith('localaccount='));
+        if(!c) return;
+        const json = decodeURIComponent(c.split('=').slice(1).join('='));
+        const obj = JSON.parse(json);
+        if(obj && obj.username) lastEl.textContent = 'Player: '+obj.username;
+      }catch(e){}
+    })();
+  </script>
+</body>
+</html>

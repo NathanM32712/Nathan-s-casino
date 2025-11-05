@@ -78,10 +78,18 @@
       document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
     }
 
+    function generateId() {
+      return 'id-' + Math.random().toString(36).slice(2, 10);
+    }
+
     const existing = getCookie('localaccount');
     if (existing) {
       try {
         const obj = JSON.parse(existing);
+        if (!obj.id) {
+          obj.id = generateId();
+          setCookie('localaccount', JSON.stringify(obj));
+        }
         msg.textContent = 'Welcome ' + obj.displayname + '! Redirecting...';
         setTimeout(() => location.href = 'home.html', 1200);
       } catch (e) {
@@ -97,7 +105,12 @@
         msg.textContent = 'Please fill all fields.';
         return;
       }
-      const obj = { username: user, pass, displayname: name };
+      const obj = {
+        username: user,
+        pass,
+        displayname: name,
+        id: generateId()
+      };
       setCookie('localaccount', JSON.stringify(obj));
       msg.textContent = 'Welcome ' + name + '! Redirecting...';
       setTimeout(() => location.href = 'home.html', 1200);

@@ -58,8 +58,8 @@
 <body>
   <div class="box">
     <h1>Login</h1>
-    <input id="user" placeholder="Username" />
-    <input id="pass" placeholder="Password" type="password" />
+    <input id="user" placeholder="Username" autocomplete="username" />
+    <input id="pass" placeholder="Password" type="password" autocomplete="current-password" />
     <button id="go">Login</button>
     <div class="msg" id="msg"></div>
   </div>
@@ -67,15 +67,12 @@
   <script>
     const msg = document.getElementById('msg');
     const go = document.getElementById('go');
+    const userInput = document.getElementById('user');
+    const passInput = document.getElementById('pass');
 
     function setCookie(name, value, days = 365) {
       const expires = new Date(Date.now() + days * 864e5).toUTCString();
       document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
-    }
-
-    function getCookie(name) {
-      const m = document.cookie.split(';').map(s => s.trim()).find(s => s.startsWith(name + '='));
-      return m ? decodeURIComponent(m.split('=').slice(1).join('=')) : null;
     }
 
     function generateId() {
@@ -88,42 +85,28 @@
       } catch (e) {}
     }
 
-    function redirectHome(name, id) {
-      msg.textContent = `Welcome ${name || 'user'}! Your ID is: ${id}`;
+    function loginNow() {
+      const user = userInput.value.trim();
+      const pass = passInput.value.trim();
+      if (!user || !pass) return;
+
+      const id = generateId();
+      const obj = { username: user, pass, id };
+      setCookie('localaccount', JSON.stringify(obj));
+      saveDeviceId(id);
+      msg.textContent = `Welcome ${user}! Your ID is: ${id}`;
       setTimeout(() => location.href = 'home.html', 1200);
     }
 
-    // Auto-login if cookie exists
-    const existing = getCookie('localaccount');
-    if (existing) {
-      try {
-        const obj = JSON.parse(existing);
-        const newId = generateId();
-        obj.id = newId;
-        setCookie('localaccount', JSON.stringify(obj));
-        saveDeviceId(newId);
-        redirectHome(obj.username, newId);
-      } catch (e) {
-        msg.textContent = 'Corrupt cookie. Please log in again.';
-      }
-    }
+    go.addEventListener('click', loginNow);
 
-    go.addEventListener('click', () => {
-      const user = document.getElementById('user').value.trim();
-      const pass = document.getElementById('pass').value.trim();
-      if (!user || !pass) {
-        msg.textContent = 'Please enter username and password.';
-        return;
-      }
-      const id = generateId();
-      const obj = {
-        username: user,
-        pass,
-        id
-      };
-      setCookie('localaccount', JSON.stringify(obj));
-      saveDeviceId(id);
-      redirectHome(user, id);
+    // Auto-login if fields are autofilled
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        if (userInput.value.trim() && passInput.value.trim()) {
+          loginNow();
+        }
+      }, 300); // slight delay to allow autofill
     });
   </script>
 </body>

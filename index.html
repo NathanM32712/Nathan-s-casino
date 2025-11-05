@@ -79,10 +79,17 @@
       return 'id-' + Math.random().toString(36).slice(2, 10);
     }
 
-    function saveDeviceId(id) {
+    function getDeviceId() {
       try {
-        localStorage.setItem('device-id', id);
-      } catch (e) {}
+        let id = localStorage.getItem('device-id');
+        if (!id || id === 'unknown') {
+          id = generateId();
+          localStorage.setItem('device-id', id);
+        }
+        return id;
+      } catch (e) {
+        return generateId();
+      }
     }
 
     function loginNow() {
@@ -90,10 +97,9 @@
       const pass = passInput.value.trim();
       if (!user || !pass) return;
 
-      const id = generateId();
+      const id = getDeviceId();
       const obj = { username: user, pass, id };
       setCookie('localaccount', JSON.stringify(obj));
-      saveDeviceId(id);
       msg.textContent = `Welcome ${user}! Your ID is: ${id}`;
       setTimeout(() => location.href = 'home.html', 1200);
     }
@@ -106,7 +112,7 @@
         if (userInput.value.trim() && passInput.value.trim()) {
           loginNow();
         }
-      }, 300); // slight delay to allow autofill
+      }, 300);
     });
   </script>
 </body>

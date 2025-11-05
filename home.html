@@ -9,11 +9,12 @@
     html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:Segoe UI, Roboto, system-ui, sans-serif}
     .wrap{max-width:880px;margin:40px auto;padding:20px}
     header{margin-bottom:12px}
-    h1{font-size:20px;color:var(--accent);margin:0;word-break:break-all}
+    h1{font-size:20px;color:var(--accent);margin:0;word-break:break-word}
     p.lead{color:var(--muted);margin:8px 0 24px 0}
     .grid{display:flex;flex-wrap:wrap;gap:12px}
     .btn{background:linear-gradient(180deg,var(--accent),#0088cc);color:#001;border:none;padding:14px 18px;border-radius:10px;font-weight:700;cursor:pointer;min-width:160px;text-align:left;box-shadow:0 6px 18px rgba(0,0,0,0.4)}
     .btn span{display:block;font-size:13px;color:rgba(0,0,0,0.5);margin-top:6px}
+    .btn.danger{background:linear-gradient(180deg,#ff5a5a,#cc0000);color:#fff}
     footer{margin-top:40px;font-size:13px;color:var(--muted);text-align:center}
     a.inline{color:var(--accent);text-decoration:none}
     @media (max-width:600px){.btn{min-width:120px;padding:12px 14px;font-size:14px}.grid{justify-content:center}}
@@ -21,7 +22,6 @@
 </head>
 <body>
   <div class="wrap">
-    <!-- The H1 itself will contain the device-id text -->
     <header>
       <h1 id="mainTitle">Game Launcher — device-id: loading…</h1>
     </header>
@@ -33,6 +33,7 @@
       <button class="btn" onclick="location.href='admin.html'">Admin<span>Operator tools</span></button>
       <button class="btn" onclick="location.href='blackjack.html'">Blackjack<span>Play cards vs dealer</span></button>
       <button class="btn" onclick="location.href='plinko.html'">Plinko<span>Drop balls and get money</span></button>
+      <button class="btn danger" onclick="signOut()">Sign Out<span>Clear login and return</span></button>
     </div>
 
     <footer>
@@ -47,9 +48,15 @@
       let id = null;
       try { id = localStorage.getItem('device-id'); } catch (e) { id = null; }
       const display = id && id.trim() ? id.trim() : 'unknown';
-      // Replace the H1 content so the device-id appears inside the <h1> element itself
       title.textContent = `Game Launcher — device-id: ${display}`;
     })();
+
+    function signOut() {
+      // Clear localaccount cookie
+      document.cookie = "localaccount=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      // Redirect to index.html
+      location.href = 'index.html';
+    }
   </script>
 </body>
 </html>

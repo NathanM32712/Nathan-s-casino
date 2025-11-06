@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Updates — Per-entry Link Generator</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    html,body{height:100%;margin:0;font-family:Segoe UI,Roboto,system-ui;background:#071827;color:#e6fbff}
+    .wrap{max-width:900px;margin:28px auto;padding:18px}
+    header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+    h1{margin:0 0 0;color:#00aaff}
+    .card{background:#082b3d;padding:16px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.5)}
+    .entry{display:flex;gap:12px;align-items:flex-start;padding:12px;border-bottom:1px solid rgba(255,255,255,0.02)}
+    .meta{min-width:140px;color:#9bd6ff;font-size:13px}
+    .title{font-weight:800;margin-bottom:6px}
+    .desc{color:#bfeeff;white-space:pre-wrap}
+    .controls{display:flex;gap:8px;align-items:center;margin-top:8px}
+    button{font:inherit;padding:8px 10px;border-radius:8px;border:none;cursor:pointer}
+    button.primary{background:linear-gradient(180deg,#00aaff,#0088cc);color:#001;font-weight:700}
+    button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:#9bd6ff}
+    .link{word-break:break-all;color:#cfefff;background:rgba(255,255,255,0.02);padding:8px;border-radius:6px;margin-top:12px}
+    .small{font-size:13px;color:#9bd6ff;margin-top:8px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Updates — Per-entry Link Generator</h1>
+      <div style="display:flex;gap:8px">
+        <button id="homeBtn" class="ghost">Home</button>
+      </div>
+    </header>
+
+    <div class="card">
+      <div class="small">Edit the UPDATES array in the source. Click "Generate" to build a link that encodes only that entry; "Copy" copies the link directly.</div>
+
+      <div id="list" style="margin-top:12px"></div>
+
+      <div class="controls" style="margin-top:14px">
+        <button id="genAll" class="primary">Generate link for all updates</button>
+        <button id="copyAll" class="ghost">Copy link for all</button>
+      </div>
+
+      <div id="linkWrap" style="display:none">
+        <div class="small">Shareable URL (encoded in hash):</div>
+        <div id="shareLink" class="link"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ====== HARD-CODED UPDATES ======
+    // Edit this array in the HTML source to change what's shown and shared.
+    // Dates should be ISO or parseable for correct ordering.
+    const UPDATES = [
+      { id: 'u3', version: '1.2.2', date: '2025-11-08', title: 'Hotfix', desc: 'Fixed edge-case crash detection', tag: 'fix' },
+      { id: 'u2', version: '1.2.1', date: '2025-11-06', title: 'Balance tweak', desc: 'Adjusted payout curve; minor UI polish', tag: 'fix' },
+      { id: 'u1', version: '1.2.0', date: '2025-11-05', title: 'Public Limbo', desc: 'Added Limbo game\nPersistent balance\nPublic update viewer', tag: 'feature' }
+    ];
+    // =================================
+
+    const listEl = document.getElementById('list');
+    const shareLink = document.getElementById('shareLink');
+    const linkWrap = document.getElementById('linkWrap');
+    const genAll = document.getElementById('genAll');
+    const copyAll = document.getElementById('copyAll');
+    const homeBtn = document.getElementById('homeBtn');
+
+    // encode helpers: produce compact base64 URL-safe payload
+    function toBase64Url(s){
+      try {
+        const b = btoa(unescape(encodeURIComponent(s)));
+        return b.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+      } catch(e){
+        return encodeURIComponent(s);
+      }
+    }
+
+    function buildUrlWithHash(payloadString){
+      const encoded = toBase64Url(payloadString);
+      return location.origin + location.pathname + '#' + encoded;
+    }
+
+    function dateToTs(d){
+      if(!d) return 0;
+      const t = Date.parse(d);
+      return isNaN(t) ? 0 : t;
+    }
+
+    function sortedUpdates(){
+      return UPDATES.slice().sort((a,b)=>{
+        const ta = dateToTs(a.date), tb = dateToTs(b.date);
+        if(tb !== ta) return tb - ta;
+        if(b.version && a.version && b.version !== a.version) return b.version.localeCompare(a.version);
+        return (b.id || '').localeCompare(a.id || '');
+      });
+    }
+
+    function escapeHtml(s=''){ return String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]); }
+
+    // render list: newest first
+    function renderList(){
+      listEl.innerHTML = '';
+      const sorted = sortedUpdates();
+      for(const item of sorted){
+        const entry = document.createElement('div');
+        entry.className = 'entry';
+        entry.innerHTML = `
+          <div class="meta">
+            <div class="ver">${escapeHtml(item.version || '—')}</div>
+            <div class="date" style="margin-top:6px;color:#9bd6ff">${escapeHtml(item.date || '')}</div>
+            <div class="small" style="margin-top:6px">${escapeHtml(item.tag || 'other')}</div>
+          </div>
+          <div style="flex:1">
+            <div class="title">${escapeHtml(item.title || 'Untitled')}</div>
+            <div class="desc">${escapeHtml(item.desc || '')}</div>
+            <div class="controls">
+              <button class="primary" data-action="gen" data-id="${escapeHtml(item.id)}">Generate link</button>
+              <button class="ghost" data-action="copy" data-id="${escapeHtml(item.id)}">Copy link</button>
+            </div>
+          </div>
+        `;
+        listEl.appendChild(entry);
+      }
+    }
+
+    function findEntry(id){ return UPDATES.find(u => u.id === id); }
+
+    // Build link that encodes only the single entry (not the whole array)
+    function generateEntryLink(item){
+      const payload = JSON.stringify(item);
+      return buildUrlWithHash(payload);
+    }
+
+    // Build link that encodes the full sorted list (newest-first)
+    function generateAllLink(){
+      const payload = JSON.stringify(sortedUpdates());
+      return buildUrlWithHash(payload);
+    }
+
+    // Event delegation for per-entry buttons
+    listEl.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if(!btn) return;
+      const action = btn.dataset.action;
+      const id = btn.dataset.id;
+      const item = findEntry(id);
+      if(!item) return alert('Entry not found');
+      if(action === 'gen'){
+        const url = generateEntryLink(item);
+        shareLink.textContent = url;
+        linkWrap.style.display = 'block';
+        try { history.replaceState(null, '', '#' + toBase64Url(JSON.stringify(item))); } catch(e){}
+      } else if(action === 'copy'){
+        const url = generateEntryLink(item);
+        navigator.clipboard?.writeText(url).then(()=> alert('Link copied to clipboard')).catch(()=> alert('Copy failed'));
+      }
+    });
+
+    // all-updates buttons
+    genAll.addEventListener('click', () => {
+      const url = generateAllLink();
+      shareLink.textContent = url;
+      linkWrap.style.display = 'block';
+      try { history.replaceState(null, '', '#' + toBase64Url(JSON.stringify(sortedUpdates()))); } catch(e){}
+    });
+
+    copyAll.addEventListener('click', () => {
+      const url = generateAllLink();
+      navigator.clipboard?.writeText(url).then(()=> alert('Link copied to clipboard')).catch(()=> alert('Copy failed'));
+    });
+
+    // Home button
+    homeBtn.addEventListener('click', () => { location.href = 'home.html'; });
+
+    // If page opens with a hash that decodes, show it in the share box
+    (function showHashOnLoad(){
+      const h = location.hash.slice(1);
+      if(!h) return;
+      shareLink.textContent = location.href;
+      linkWrap.style.display = 'block';
+    })();
+
+    renderList();
+  </script>
+</body>
+</html>

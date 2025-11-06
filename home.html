@@ -5,36 +5,91 @@
   <title>Home Launcher</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    :root{--bg:#071018;--fg:#cfefff;--accent:#00aaff;--muted:#7fbfdc}
+    :root{
+      --bg:#071018;
+      --fg:#cfefff;
+      --accent:#00aaff;
+      --muted:#7fbfdc;
+      --green:#46d37a;
+      --purple:#8a5cff;
+      --danger1:#ff5a5a;
+      --danger2:#cc0000;
+      --card:#082b3d;
+    }
     html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:Segoe UI, Roboto, system-ui, sans-serif}
     .wrap{max-width:880px;margin:40px auto;padding:20px}
-    header{margin-bottom:12px}
+    header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+    .titleWrap{display:flex;flex-direction:column;gap:6px}
     h1{font-size:20px;color:var(--accent);margin:0;word-break:break-word}
-    p.lead{color:var(--muted);margin:8px 0 24px 0}
+    p.lead{color:var(--muted);margin:8px 0 18px 0}
     .grid{display:flex;flex-wrap:wrap;gap:12px}
-    .btn{background:linear-gradient(180deg,var(--accent),#0088cc);color:#001;border:none;padding:14px 18px;border-radius:10px;font-weight:700;cursor:pointer;min-width:160px;text-align:left;box-shadow:0 6px 18px rgba(0,0,0,0.4)}
+    .btn{
+      background:linear-gradient(180deg,var(--accent),#0088cc);
+      color:#001;border:none;padding:14px 18px;border-radius:10px;font-weight:700;
+      cursor:pointer;min-width:160px;text-align:left;box-shadow:0 6px 18px rgba(0,0,0,0.35)
+    }
     .btn span{display:block;font-size:13px;color:rgba(0,0,0,0.5);margin-top:6px}
-    .btn.danger{background:linear-gradient(180deg,#ff5a5a,#cc0000);color:#fff}
-    footer{margin-top:40px;font-size:13px;color:var(--muted);text-align:center}
+    .btn.green{background:linear-gradient(180deg,var(--green),#2fa85a);color:#012a12}
+    .btn.purple{background:linear-gradient(180deg,var(--purple),#6f3be0);color:#0b0220}
+    .btn.danger{background:linear-gradient(180deg,var(--danger1),var(--danger2));color:#fff}
+    /* box for sign out in header */
+    .signBox{
+      background:var(--card);
+      padding:8px;
+      border-radius:10px;
+      box-shadow:0 8px 20px rgba(0,0,0,0.45);
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .signBox .btn{min-width:120px;padding:10px 12px}
+    footer{margin-top:34px;font-size:13px;color:var(--muted);text-align:center}
     a.inline{color:var(--accent);text-decoration:none}
-    @media (max-width:600px){.btn{min-width:120px;padding:12px 14px;font-size:14px}.grid{justify-content:center}}
+    @media (max-width:600px){
+      .btn{min-width:120px;padding:12px 14px;font-size:14px}
+      .grid{justify-content:center}
+      header{flex-direction:column;align-items:flex-start;gap:10px}
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <h1 id="mainTitle">Game Launcher — device-id: loading…</h1>
+      <div class="titleWrap">
+        <h1 id="mainTitle">Game Launcher — device-id: loading…</h1>
+        <div class="leadWrap"><p class="lead">Choose a game or page to open:</p></div>
+      </div>
+
+      <!-- Sign out placed inside a boxed card -->
+      <div class="signBox" role="group" aria-label="account actions">
+        <button class="btn danger" onclick="signOut()">
+          Sign Out
+          <span style="color:rgba(255,255,255,0.85);font-weight:600">Clear login and return</span>
+        </button>
+      </div>
     </header>
 
-    <p class="lead">Choose a game or page to open:</p>
+    <div class="grid" role="navigation" aria-label="launcher">
+      <!-- Updates green, Admin purple -->
+      <button class="btn green" onclick="location.href='update.html'">Updates
+        <span>Latest changes</span>
+      </button>
 
-    <div class="grid">
-      <button class="btn" onclick="location.href='update.html'">Updates<span>Latest changes</span></button>
-      <button class="btn" onclick="location.href='admin.html'">Admin<span>Operator tools</span></button>
-      <button class="btn" onclick="location.href='blackjack.html'">Blackjack<span>Play cards vs dealer</span></button>
-      <button class="btn" onclick="location.href='plinko.html'">Plinko<span>Drop balls and get money</span></button>
-      <button class="btn" onclick="location.href='limbo.html'">limbo<span>Dont let the multiplyers get to big</span></button>
-      <button class="btn danger" onclick="signOut()">Sign Out<span>Clear login and return</span></button>
+      <button class="btn purple" onclick="location.href='admin.html'">Admin
+        <span>Operator tools</span>
+      </button>
+
+      <button class="btn" onclick="location.href='blackjack.html'">Blackjack
+        <span>Play cards vs dealer</span>
+      </button>
+
+      <button class="btn" onclick="location.href='plinko.html'">Plinko
+        <span>Drop balls and get money</span>
+      </button>
+
+      <button class="btn" onclick="location.href='limbo.html'">Limbo
+        <span>Don't let the multipliers get too big</span>
+      </button>
     </div>
 
     <footer>
@@ -61,7 +116,3 @@
   </script>
 </body>
 </html>
-
-
-
-

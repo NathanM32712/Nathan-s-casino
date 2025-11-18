@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Device-ID Setter</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, sans-serif; margin: 24px; }
+    .card { max-width: 560px; border: 1px solid #ccc; border-radius: 12px; padding: 16px; }
+    .row { display: flex; gap: 8px; margin: 8px 0; }
+    input[type="text"] { flex: 1; padding: 8px; font-size: 14px; }
+    button { padding: 8px 12px; font-size: 14px; cursor: pointer; }
+    .muted { font-size: 12px; color: #666; }
+    .idbox { font-family: ui-monospace, Consolas, monospace; background: #f7f7f7; padding: 8px; border-radius: 8px; }
+    .ok { color: #0a8; }
+    .warn { color: #c60; }
+  </style>
+</head>
+<body>
+  <div class="card" id="deviceIdCard">
+    <h2>Device-ID cookie</h2>
+
+    <div class="row">
+      <input id="deviceIdInput" type="text" placeholder="Enter device-id or generate" />
+      <button id="generateBtn">Generate</button>
+      <button id="setBtn">Set</button>
+    </div>
+
+    <div class="row">
+      <button id="copyBtn">Copy current</button>
+      <button id="resetBtn">Reset cookie</button>
+    </div>
+
+    <div class="row">
+      <label>Expires (days):
+        <input id="daysInput" type="number" min="1" value="365" style="width:90px;" />
+      </label>
+      <label>Path:
+        <input id="pathInput" type="text" value="/" style="width:120px;" />
+      </label>
+      <label>SameSite:
+        <select id="sameSiteSelect">
+          <option value="Lax">Lax</option>
+          <option value="Strict">Strict</option>
+          <option value="None">None</option>
+        </select>
+      </label>
+      <label>Secure:
+        <input id="secureCheck" type="checkbox" />
+      </label>
+    </div>
+
+    <div class="idbox" id="statusBox">No cookie set.</div>
+    <div class="muted">Tip: “Secure + SameSite=None” requires HTTPS.</div>
+  </div>
+
+  <script>
+    // CONFIG
+    const COOKIE_NAME = "device_id";
+
+    // UTILITIES
+    function genDeviceId() {
+      // Stable, URL-safe ID: timestamp + random + short hash
+      const ts = Date.now().toString(36);
+      const rand = crypto.getRandomValues(new Uint8Array(12));
+      const r = Array.from(rand).map(b => b.toString(36).padStart(2, "0")).join("");
+      const short = btoa(String.fromCharCode(...rand)).replace(/[^A-Za-z0-9]/g, "").slice(0, 8);
+      return `dev-${ts}-${r.slice(0, 12)}-${short}`;
+    }
+
+    function setCookie(name, value, days, path = "/", sameSite = "Lax", secure = false) {
+      const d = new Date();
+      d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+      let parts = [
+        `${name}=${encodeURIComponent(value)}`,
+        `Expires=${d.toUTCString()}`,
+        `Path=${path}`,
+        `SameSite=${sameSite}`
+      ];
+      if (secure) parts.push("Secure"); // Note: HttpOnly cannot be set via JS
+      document.cookie = parts.join("; ");
+    }
+
+    function getCookie(name) {
+      const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+      return match ? decodeURIComponent(match[1]) : null;
+    }
+
+    function deleteCookie(name, path = "/") {
+      document.cookie = `${name}=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=${path}`;
+    }
+
+    function updateStatus() {
+      const val = getCookie(COOKIE_NAME);
+      const box = document.getElementById("statusBox");
+      if (val) {
+        box.innerHTML = `<span class="ok">Current:</span> ${val}`;
+      } else {
+        box.innerHTML = `<span class="warn">No cookie set.</span>`;
+      }
+    }
+
+    // HOOKUP
+    const input = document.getElementById("deviceIdInput");
+    const generateBtn = document.getElementById("generateBtn");
+    const setBtn = document.getElementById("setBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const daysInput = document.getElementById("daysInput");
+    const pathInput = document.getElementById("pathInput");
+    const sameSiteSelect = document.getElementById("sameSiteSelect");
+    const secureCheck = document.getElementById("secureCheck");
+
+    // Initialize UI with current cookie
+    window.addEventListener("DOMContentLoaded", () => {
+      const current = getCookie(COOKIE_NAME);
+      if (current) input.value = current;
+      // Auto-check Secure if SameSite=None (best practice for cross-site)
+      sameSiteSelect.addEventListener("change", () => {
+        if (sameSiteSelect.value === "None") secureCheck.checked = true;
+      });
+      updateStatus();
+    });
+
+    generateBtn.addEventListener("click", () => {
+      input.value = genDeviceId();
+    });
+
+    setBtn.addEventListener("click", () => {
+      const val = input.value.trim() || genDeviceId();
+      const days = Math.max(1, parseInt(daysInput.value || "365", 10));
+      const path = pathInput.value || "/";
+      const sameSite = sameSiteSelect.value;
+      const secure = !!secureCheck.checked;
+      setCookie(COOKIE_NAME, val, days, path, sameSite, secure);
+      updateStatus();
+    });
+
+    copyBtn.addEventListener("click", async () => {
+      const val = getCookie(COOKIE_NAME);
+      if (!val) return;
+      try {
+        await navigator.clipboard.writeText(val);
+        alert("Device-ID copied to clipboard.");
+      } catch {
+        alert("Copy failed. You can select and copy manually.");
+      }
+    });
+
+    resetBtn.addEventListener("click", () => {
+      const path = pathInput.value || "/";
+      deleteCookie(COOKIE_NAME, path);
+      updateStatus();
+    });
+  </script>
+</body>
+</html>

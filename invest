@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>invest</title>
+  <link rel="icon" type="image/png" href="icon.png" />
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: sans-serif;
+      text-align: center;
+    }
+    canvas {
+      background-color: #111;
+      display: block;
+      margin: 20px auto;
+      border: 1px solid #333;
+    }
+    input, button {
+      margin: 5px;
+      padding: 8px;
+      font-size: 16px;
+    }
+    .label {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <a href="https://nathanm32712.github.io/html-hub/" style="position: fixed; top: 12px; left: 12px; z-index: 100;">
+    <img src="icon.png" alt="" style="height: 60px; background: black; border-radius: 4px;">
+  </a>
+  <h1>📊 Gamble Candlestick Game</h1>
+  <div>
+    <span class="label">Balance:</span> <span id="balance">0</span><br>
+    <span class="label">Active Investment:</span> <span id="investment">0</span><br>
+    <span class="label">Live Value:</span> <span id="livevalue">0</span>
+  </div>
+  <div>
+    <input type="number" id="betamount" placeholder="Enter bet amount" />
+    <button onclick="placeBet()">Bet</button>
+    <button onclick="cashOut()">Cash Out</button>
+    <button onclick="reInvest()">Reinvest</button>
+  </div>
+  <canvas id="graph" width="800" height="400"></canvas>
+
+  <script>
+    const canvas = document.getElementById('graph');
+    const ctx = canvas.getContext('2d');
+    let multipliers = [0];
+    let investment = 0;
+    let multiplier = 0;
+    let balance = getCookie('slotsBalance') ? parseFloat(getCookie('slotsBalance')) : 1000;
+    let maxPoints = 50;
+
+    function getCookie(name) {
+      const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+      return match ? match[2] : null;
+    }
+
+    function setCookie(name, value) {
+      document.cookie = `${name}=${value}; path=/`;
+    }
+
+    function updateDisplay() {
+      document.getElementById('balance').textContent = balance.toFixed(2);
+      document.getElementById('investment').textContent = investment.toFixed(2);
+      document.getElementById('livevalue').textContent = (investment * multiplier).toFixed(2);
+    }
+
+    function placeBet() {
+      const amt = parseFloat(document.getElementById('betamount').value);
+      if (amt > 0 && amt <= balance) {
+        balance -= amt;
+        investment += amt;
+        setCookie('slotsBalance', balance.toFixed(2));
+        updateDisplay();
+      }
+    }
+
+    function cashOut() {
+      const payout = investment * multiplier;
+      balance += payout;
+      investment = 0;
+      setCookie('slotsBalance', balance.toFixed(2));
+      updateDisplay();
+    }
+
+    function reInvest() {
+      const amt = parseFloat(document.getElementById('betamount').value);
+      if (amt > 0 && amt <= balance) {
+        balance -= amt;
+        investment += amt;
+        setCookie('slotsBalance', balance.toFixed(2));
+        updateDisplay();
+      }
+    }
+
+    function updateGraph() {
+      const last = multipliers[multipliers.length - 1];
+      const change = Math.random() * 20 - 10;
+      const next = last + change;
+      multipliers.push(next);
+      multiplier = next;
+      if (multipliers.length > maxPoints) {
+        maxPoints += 10; // expand horizontal scale only when needed
+      }
+      drawCandles();
+      updateDisplay();
+    }
+
+    function drawCandles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const w = canvas.width;
+      const h = canvas.height;
+      const count = multipliers.length;
+      const step = w / Math.max(maxPoints, count);
+      const candleWidth = step * 0.6;
+
+      const maxAbs = Math.max(10, ...multipliers.map(v => Math.abs(v)));
+
+      for (let i = 1; i < count; i++) {
+        const x = i * step;
+        const yPrev = h / 2 - (multipliers[i - 1] / maxAbs) * (h / 2);
+        const yCurr = h / 2 - (multipliers[i] / maxAbs) * (h / 2);
+        const top = Math.min(yPrev, yCurr);
+        const bottom = Math.max(yPrev, yCurr);
+        ctx.fillStyle = multipliers[i] >= multipliers[i - 1] ? 'lime' : 'red';
+        ctx.fillRect(x - candleWidth / 2, top, candleWidth, bottom - top);
+      }
+    }
+
+    updateDisplay();
+    drawCandles();
+    setInterval(updateGraph, 1500);
+  </script>
+</body>
+</html>

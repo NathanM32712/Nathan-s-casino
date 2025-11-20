@@ -46,12 +46,14 @@
   <canvas id="graph" width="800" height="400"></canvas>
 
   <script>
+    const BALANCE_KEY = 'slotsBalance'; // centralized cookie key
+
     const canvas = document.getElementById('graph');
     const ctx = canvas.getContext('2d');
     let multipliers = [0];
     let investment = 0;
     let multiplier = 0;
-    let balance = getCookie('slotsBalance') ? parseFloat(getCookie('slotsBalance')) : 1000;
+    let balance = getCookie(BALANCE_KEY) ? parseFloat(getCookie(BALANCE_KEY)) : 1000;
     let maxPoints = 50;
 
     function getCookie(name) {
@@ -74,7 +76,7 @@
       if (amt > 0 && amt <= balance) {
         balance -= amt;
         investment += amt;
-        setCookie('slotsBalance', balance.toFixed(2));
+        setCookie(BALANCE_KEY, balance.toFixed(2));
         updateDisplay();
       }
     }
@@ -83,7 +85,7 @@
       const payout = investment * multiplier;
       balance += payout;
       investment = 0;
-      setCookie('slotsBalance', balance.toFixed(2));
+      setCookie(BALANCE_KEY, balance.toFixed(2));
       updateDisplay();
     }
 
@@ -92,7 +94,7 @@
       if (amt > 0 && amt <= balance) {
         balance -= amt;
         investment += amt;
-        setCookie('slotsBalance', balance.toFixed(2));
+        setCookie(BALANCE_KEY, balance.toFixed(2));
         updateDisplay();
       }
     }
